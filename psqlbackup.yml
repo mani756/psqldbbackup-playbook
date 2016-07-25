@@ -1,0 +1,18 @@
+---
+- name: postgres backups
+  hosts: pgbackup
+  vars_files:
+    - vars.yml
+
+  tasks:
+  
+    - name: Create Backups folder
+      file: path={{ remote_bk_dir }} state=directory
+        
+    - name: Get timestamp of file name to be created
+      command: date +%Y%m%d-%H%M%S
+      register: time    
+
+    - name: Take {{db_name}} DB backup
+      shell: pg_dump -U {{ db_user }} --create {{ db_name }} | gzip >> {{ remote_bk_dir }}/{{ db_name }}_dump_{{ time.stdout }}.sql.gz
+     
